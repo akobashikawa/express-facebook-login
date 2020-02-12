@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MyExpress</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel='stylesheet' href='./css/style.css' />
+</head>
+
+<body>
+
+    <script>
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '558174924795209',
+                cookie: true,
+                xfbml: true,
+                version: 'v6.0'
+            });
+
+            FB.AppEvents.logPageView();
+
+            // ---
+            app.fbGetStatus();
+        };
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) { return; }
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v6.0&appId=558174924795209&autoLogAppEvents=1"></script>
+
+    <div id="app">
+
+        <header>
+            <div class="navbar shadow-sm">
+                <div class="container">
+                    <a href="./" class="navbar-brand">MyExpress</a>
+                </div>
+            </div>
+        </header>
+        <main class="pt-2">
+            <div class="container">
+                <p>Hola Express!</p>
+
+                <p>
+                    <b>FB status:</b>
+                    <i>{{ fbStatus }}</i> :
+                    {{ fbStatusText }}
+                </p>
+
+                <div class="fb-login-button" data-width="" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-scope="public_profile,email"></div>
+
+                <p class="mt-2">
+                    <button class="btn btn-primary" @click="fbLogout" v-if="fbAuthorized">Cerrar sesión de Facebook</button>
+                    <button class="btn btn-primary" @click="fbLogin" v-else>Iniciar sesión con Facebook</button>
+                </p>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    fbStatus: '',
+                    fbStatusText: '',
+                    fbAuthResponse: null,
+                };
+            },
+            methods: {
+                fbGetStatus() {
+                    console.log('fbGetStatus');
+                    const self = this;
+                    FB.getLoginStatus(function (response) {
+                        console.log(response);
+                        self.fbStatus = response.status;
+                        switch (response.status) {
+                            case 'connected':
+                                self.fbStatusText = 'la persona inició sesión en Facebook y en tu aplicación';
+
+                                const authResponse = response.authResponse;
+                                self.fbAuthResponse = authResponse;
+
+                                console.log('accessToken: contiene un token de acceso para la persona que usa la aplicación', authResponse.accessToken);
+                                console.log('expiresIn: indica la hora UNIX en que el token caduca y se debe renovar', authResponse.expiresIn);
+                                console.log('signedRequest: un parámetro firmado que contiene información sobre la persona que usa la aplicación', authResponse.signedRequest);
+                                console.log('userID: es el identificador de la persona que usa la aplicación', authResponse.userID);
+
+                                FB.api('/me', function (response) {
+                                    console.log(response);
+                                    console.log(JSON.stringify(response));
+                                    console.log('Successful login for: ' + response.name + ', ' + response.email);
+                                });
+                                FB.api('/me/permissions', function (response) {
+                                    console.log(response);
+                                    console.log(JSON.stringify(response));
+                                });
+                                break;
+                            case 'not_authorized':
+                                self.fbStatusText = 'la persona inició sesión en Facebook, pero no en tu aplicación';
+                                self.fbAuthResponse = null;
+                                break;
+                            case 'unknown':
+                                self.fbStatusText = 'la persona no inició sesión en Facebook y no sabes si lo hizo en tu aplicación o si se llamó antes al método FB.logout(), por lo que no puede conectarse a Facebook';
+                                self.fbAuthResponse = null;
+                                break;
+
+                            default:
+                                break;
+                        }
+                    });
+                },
+                fbLogin() {
+                    console.log('fblogin');
+                    const self = this;
+                    FB.login(function (response) {
+                        console.log(response);
+                        self.fbGetStatus();
+                    }, { scope: 'public_profile, email' });
+                },
+                fbLogout() {
+                    console.log('fblogout');
+                    const self = this;
+                    FB.logout(function (response) {
+                        console.log(response);
+                        self.fbGetStatus();
+                    });
+                }
+            },
+            mounted() {
+                console.log('mounted');
+
+            },
+            computed: {
+                fbAuthorized() {
+                    if (this.fbAuthResponse) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+        });
+    </script>
+</body>
+
+</html>
