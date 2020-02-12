@@ -50,6 +50,8 @@
                 <p>Hola Express!</p>
 
                 <p>
+                    <pre>{{ fbUser }}</pre>
+                    <pre>{{ fbUserPermissions }}</pre>
                     <b>FB status:</b>
                     <i>{{ fbStatus }}</i> :
                     {{ fbStatusText }}
@@ -60,6 +62,8 @@
                 <p class="mt-2">
                     <button class="btn btn-primary" @click="fbLogout" v-if="fbAuthorized">Cerrar sesión de Facebook</button>
                     <button class="btn btn-primary" @click="fbLogin" v-else>Iniciar sesión con Facebook</button>
+
+                    <button class="btn btn-info" @click="fbRevokePermissions" v-if="fbAuthorized">Revocar permisos</button>
                 </p>
 
             </div>
@@ -67,6 +71,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     <script>
         var app = new Vue({
@@ -76,12 +81,18 @@
                     fbStatus: '',
                     fbStatusText: '',
                     fbAuthResponse: null,
+                    fbUser: null,
+                    fbUserPermissions: null,
                 };
             },
             methods: {
                 fbGetStatus() {
-                    console.log('fbGetStatus');
                     const self = this;
+                    self.fbStatus = '';
+                    self.fbStatusText = '';
+                    self.fbAuthResponse = null;
+                    self.fbUser = null;
+                    self.fbUserPermissions = null;
                     FB.getLoginStatus(function (response) {
                         console.log(response);
                         self.fbStatus = response.status;
@@ -97,14 +108,17 @@
                                 console.log('signedRequest: un parámetro firmado que contiene información sobre la persona que usa la aplicación', authResponse.signedRequest);
                                 console.log('userID: es el identificador de la persona que usa la aplicación', authResponse.userID);
 
-                                FB.api('/me', function (response) {
+                                FB.api('/me', 'GET', { 'fields': 'id, name, email, gender, birthday, age_range' }, function (response) {
                                     console.log(response);
-                                    console.log(JSON.stringify(response));
-                                    console.log('Successful login for: ' + response.name + ', ' + response.email);
+                                    if (!response.error) {
+                                        self.fbUser = response;
+                                    }
                                 });
                                 FB.api('/me/permissions', function (response) {
                                     console.log(response);
-                                    console.log(JSON.stringify(response));
+                                    if (!response.error) {
+                                        self.fbUserPermissions = response;
+                                    }
                                 });
                                 break;
                             case 'not_authorized':
@@ -122,21 +136,26 @@
                     });
                 },
                 fbLogin() {
-                    console.log('fblogin');
                     const self = this;
                     FB.login(function (response) {
                         console.log(response);
                         self.fbGetStatus();
-                    }, { scope: 'public_profile, email' });
+                    }, { scope: 'public_profile, email, user_gender, user_age_range, user_birthday' });
                 },
                 fbLogout() {
-                    console.log('fblogout');
                     const self = this;
                     FB.logout(function (response) {
                         console.log(response);
                         self.fbGetStatus();
                     });
-                }
+                },
+                fbRevokePermissions() {
+                    const self = this;
+                    FB.api(`/${self.fbUser.id}/permissions`, 'DELETE', function (response) {
+                        console.log(response);
+                        self.fbGetStatus();
+                    });
+                },
             },
             mounted() {
                 console.log('mounted');
