@@ -91,8 +91,8 @@
                     self.fbStatus = '';
                     self.fbStatusText = '';
                     self.fbAuthResponse = null;
-                    self.fbUser = null;
                     self.fbUserPermissions = null;
+
                     FB.getLoginStatus(function (response) {
                         console.log(response);
                         self.fbStatus = response.status;
@@ -108,7 +108,7 @@
                                 console.log('signedRequest: un parámetro firmado que contiene información sobre la persona que usa la aplicación', authResponse.signedRequest);
                                 console.log('userID: es el identificador de la persona que usa la aplicación', authResponse.userID);
 
-                                FB.api('/me', 'GET', { 'fields': 'id, name, email, gender, birthday, age_range' }, function (response) {
+                                FB.api('/me', 'GET', { 'fields': 'id, name, email, gender, birthday' }, function (response) {
                                     console.log(response);
                                     if (!response.error) {
                                         self.fbUser = response;
@@ -140,7 +140,7 @@
                     FB.login(function (response) {
                         console.log(response);
                         self.fbGetStatus();
-                    }, { scope: 'public_profile, email, user_gender, user_age_range, user_birthday' });
+                    }, { scope: 'public_profile, email, user_gender, user_birthday' });
                 },
                 fbLogout() {
                     const self = this;
