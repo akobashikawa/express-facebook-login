@@ -41,7 +41,7 @@ const facebookCallback = facebookCallbackBuilder(database);
 passport.use('facebook', new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "http://localhost:3000/api/auth/facebook-callback"
+    callbackURL: `${process.env.BASE_URL}/api/auth/facebook-callback`
 }, facebookCallback));
 
 exports.facebookAuthenticate = passport.authenticate('facebook', { scope: ['public_profile', 'email', 'user_gender', 'user_birthday'] });

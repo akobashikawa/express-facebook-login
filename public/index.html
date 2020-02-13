@@ -76,6 +76,8 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
+    <script src="js/env.js"></script>
+
     <script>
         var app = new Vue({
             el: '#app',
@@ -144,7 +146,7 @@
                         console.log(response);
                         self.fbGetStatus();
 
-                        const url = `/api/auth/facebook-login`;
+                        const url = `${BASE_URL}/api/auth/facebook-login`;
                         const data = {
 
                         };
