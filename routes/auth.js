@@ -5,6 +5,8 @@ const router = express.Router();
 const authController = require('../controllers/auth');
 
 router.post('/login', auth.authenticate, authController.authorized);
+router.post('/facebook-login', auth.facebookAuthenticate, authController.authorized);
+router.get('/facebook-callback', authController.authorized);
 router.post('/logout', authController.logout);
 
 router.get('/authorized', authController.authorized);

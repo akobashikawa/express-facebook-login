@@ -47,24 +47,27 @@
         </header>
         <main class="pt-2">
             <div class="container">
-                <p>Hola Express!</p>
+                <p>Facebook Login</p>
 
-                <p>
-                    <pre>{{ fbUser }}</pre>
-                    <pre>{{ fbUserPermissions }}</pre>
-                    <b>FB status:</b>
-                    <i>{{ fbStatus }}</i> :
-                    {{ fbStatusText }}
-                </p>
 
-                <div class="fb-login-button" data-width="" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-scope="public_profile,email"></div>
+                <div class="mt-2" v-if="fbAuthorized">
+                    Bienvenido
 
-                <p class="mt-2">
-                    <button class="btn btn-primary" @click="fbLogout" v-if="fbAuthorized">Cerrar sesión de Facebook</button>
-                    <button class="btn btn-primary" @click="fbLogin" v-else>Iniciar sesión con Facebook</button>
+                    <p>
+                        <pre>{{ fbUser }}</pre>
+                        <pre>{{ fbUserPermissions }}</pre>
 
-                    <button class="btn btn-info" @click="fbRevokePermissions" v-if="fbAuthorized">Revocar permisos</button>
-                </p>
+                        <i>{{ fbStatus }}</i> :
+                        {{ fbStatusText }}
+                    </p>
+
+                    <button class="btn btn-primary" @click="fbLogout">Cerrar sesión de Facebook</button>
+                    <button class="btn btn-info" @click="fbRevokePermissions">Revocar permisos</button>
+                </div>
+
+                <div class="mt-2" v-else>
+                    <button class="btn btn-primary" @click="fbLogin">Iniciar sesión con Facebook</button>
+                </div>
 
             </div>
         </main>
@@ -140,6 +143,18 @@
                     FB.login(function (response) {
                         console.log(response);
                         self.fbGetStatus();
+
+                        const url = `/api/auth/facebook-login`;
+                        const data = {
+
+                        };
+                        axios({ url, method: 'POST', data })
+                            .then(response => {
+                                console.log(response);
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
                     }, { scope: 'public_profile, email, user_gender, user_birthday' });
                 },
                 fbLogout() {
