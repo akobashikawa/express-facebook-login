@@ -59,6 +59,9 @@
 
                         <i>{{ fbStatus }}</i> :
                         {{ fbStatusText }}
+
+                        <i>User:</i>
+                        <pre>{{ user }}</pre>
                     </p>
 
                     <button class="btn btn-primary" @click="fbLogout">Cerrar sesión de Facebook</button>
@@ -67,6 +70,7 @@
 
                 <div class="mt-2" v-else>
                     <button class="btn btn-primary" @click="fbLogin">Iniciar sesión con Facebook</button>
+                    <a class="btn btn-primary text-white" href="./api/auth/facebook-login">Iniciar sesión con Facebook 2</a>
                 </div>
 
             </div>
@@ -88,6 +92,7 @@
                     fbAuthResponse: null,
                     fbUser: null,
                     fbUserPermissions: null,
+                    user: null,
                 };
             },
             methods: {
@@ -145,14 +150,13 @@
                     FB.login(function (response) {
                         console.log(response);
                         self.fbGetStatus();
-
-                        const url = `${BASE_URL}/api/auth/facebook-login`;
-                        const data = {
-
-                        };
-                        axios({ url, method: 'POST', data })
+                        // window.location.href = `${BASE_URL}/api/auth/facebook-login`;
+                        // axios.get(`https://www.facebook.com/v6.0/dialog/oauth?client_id=558174924795209&redirect_uri=${BASE_URL}/api/auth/facebook-callback&state="{st=state123abc,ds=123456789}"`)
+                        const accessToken = self.fbAuthResponse.accessToken;
+                        axios.get(`${BASE_URL}/api/auth/facebook-validate?access_token=${accessToken}`)
                             .then(response => {
-                                console.log(response);
+                                console.log(response.data);
+                                self.user = response.data;
                             })
                             .catch(error => {
                                 console.log(error);
