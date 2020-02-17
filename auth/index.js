@@ -53,12 +53,12 @@ exports.facebookAuthenticate = passport.authenticate('facebook', { scope: ['publ
 const facebookValidateBuilder = (database) => async (req, res, next) => {
     const inputToken = req.query['access_token'] || '';
     try {
-        // const response_ = await axios.get(`https://graph.facebook.com/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&client_secret=${process.env.FACEBOOK_APP_SECRET}`);
-        // console.log(response_.data);
-        // const accessToken = response_.data;
+        const response_ = await axios.get(`https://graph.facebook.com/oauth/access_token?client_id=${process.env.FACEBOOK_APP_ID}&client_secret=${process.env.FACEBOOK_APP_SECRET}&grant_type=client_credentials`);
+        const accessToken = response_.data.access_token;
+        console.log(accessToken);
 
-        const { data } = await axios.get(`https://graph.facebook.com/me?access_token=${inputToken}`);
-        // const { data } = await axios.get(`https://graph.facebook.com/me?debug_token?input_token=${inputToken}&access_token=${accessToken}`);
+        // const { data } = await axios.get(`https://graph.facebook.com/me?access_token=${inputToken}`);
+        const { data } = await axios.get(`https://graph.facebook.com/debug_token?input_token=${inputToken}&access_token=${accessToken}`);
         console.log(data);
         const user = await database.find({ facebookId: data.id });
         req.user = user;
